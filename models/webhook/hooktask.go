@@ -5,6 +5,8 @@ package webhook
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"code.gitea.io/gitea/models/db"
@@ -125,6 +127,17 @@ func CreateHookTask(ctx context.Context, t *HookTask) (*HookTask, error) {
 		t.Delivered = timeutil.TimeStampNanoNow()
 	}
 	return t, db.Insert(ctx, t)
+}
+
+func HookTasksByHookId(hookIds []string) ([]*HookTask, error) {
+	str := strings.Join(hookIds, ",")
+	fmt.Println("query str", str)
+	tasks := make([]*HookTask, 0, setting.Webhook.PagingNum)
+	return tasks, db.GetEngine(db.DefaultContext).
+		Where("hook_id in (?)", str).
+		GroupBy("hook_id").
+		Desc("id").
+		Find(&tasks)
 }
 
 func GetHookTaskByID(ctx context.Context, id int64) (*HookTask, error) {

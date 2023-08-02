@@ -1,4 +1,26 @@
 {{if .PageIsSettingsHooksEdit}}
+	<script>
+		const WebhookHistory = {{.History}};
+		window.onload = () => {
+			if(!WebhookHistory) return ;
+			WebhookHistory.forEach(item => {
+				if (item.Delivered) {
+					const timeId = "#Webhook-history-time-"+item.ID;
+					$(timeId).text(new Date(item.Delivered / 1000 / 1000 ).toLocaleString());
+				}
+				
+				if (item.PayloadContent) {
+					const payloadContent = JSON.parse(item.PayloadContent);
+					const authorId = "#Webhook-history-author-"+item.ID;
+					$(authorId).text(payloadContent.pusher.login ? payloadContent.pusher.login : payloadContent.pusher.login_name);
+					$(authorId).attr("href", "/" + payloadContent.pusher.login)
+
+					const authorImgId = "#Webhook-history-author-img-"+item.ID;
+					$(authorImgId).attr("src", payloadContent.pusher.avatar_url);
+				}
+			})
+		}
+	</script>
 	<h4 class="ui top attached header">
 		{{.locale.Tr "repo.settings.recent_deliveries"}}
 		{{if .Permission.IsAdmin}}
@@ -19,10 +41,15 @@
 							<span class="text red">{{svg "octicon-alert"}}</span>
 						{{end}}
 						<a class="ui primary sha label toggle button show-panel" data-panel="#info-{{.ID}}">{{.UUID}}</a>
-						<div class="ui right">
+						{{if .PayloadContent}}
+							<a id="Webhook-history-author-{{.ID}}" href="/">加载中...</a>
+							<img id="Webhook-history-author-img-{{.ID}}" class="ui avatar gt-vm tiny" src="/avatars/b0b07e5bacd5d60fa7b11f05979c937070d92dc3a7e1e85101c6c01d52d5cd29?size=48" title="zengye" width="24" height="24">
+						{{end}}
+						<div class="ui right" style="text-align: center;">
 							<span class="text grey time">
 								{{TimeSince .Delivered.AsTime $.locale}}
 							</span>
+							<p id="Webhook-history-time-{{.ID}}"></p>
 						</div>
 					</div>
 					<div class="info gt-hidden" id="info-{{.ID}}">

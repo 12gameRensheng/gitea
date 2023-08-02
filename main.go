@@ -80,6 +80,7 @@ arguments - which can alternatively be run by running the subcommand web.`
 	// Now adjust these commands to add our global configuration options
 
 	// First calculate the default paths and set the AppHelpTemplates in this context
+	// setting.SetCustomPathAndConf("", "", "D:/code/prod/gitea")
 	setting.SetCustomPathAndConf("", "", "")
 	setAppHelpTemplates()
 

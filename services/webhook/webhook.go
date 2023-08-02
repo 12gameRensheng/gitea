@@ -189,9 +189,19 @@ func PrepareWebhook(ctx context.Context, w *webhook_model.Webhook, event webhook
 		if w.Type != webhook_module.GITEA && w.Type != webhook_module.GOGS &&
 			len(pushEvent.Commits) == 0 {
 			return nil
-		} else if w.CommitFilter != "" && !strings.Contains(pushEvent.Commits[0].Message, w.CommitFilter) {
-			log.Info("Commit message %q doesn't match commit filter %q, skipping", pushEvent.Commits[0].Message, w.CommitFilter)
-			return nil
+		} else if w.CommitFilter != "" && w.CommitFilter != "*" { // w.CommitFilter != "" && !strings.Contains(pushEvent.Commits[0].Message, w.CommitFilter)
+			strs := strings.Split(w.CommitFilter, ",")
+			flag := false
+			for _, s := range strs {
+				if strings.Index(strings.TrimSpace(s), pushEvent.Commits[0].Message) != -1 {
+					flag = true
+				}
+			}
+
+			if !flag {
+				log.Info("Commit message %q doesn't match commit filter %q, skipping", pushEvent.Commits[0].Message, w.CommitFilter)
+				return nil
+			}
 		}
 	}
 

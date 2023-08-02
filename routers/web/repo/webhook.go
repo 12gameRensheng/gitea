@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 
 	"code.gitea.io/gitea/models/perm"
@@ -50,6 +51,24 @@ func Webhooks(ctx *context.Context) {
 		ctx.ServerError("GetWebhooksByRepoID", err)
 		return
 	}
+
+	ids := []string{}
+
+	fmt.Println(" Webhooks ")
+
+	for _, v := range ws {
+		ids = append(ids, strconv.Itoa(int(v.ID)))
+	}
+
+	fmt.Println("ids", ids, len(ids))
+
+	hookTast, _ := webhook.HookTasksByHookId(ids)
+	fmt.Println("hookTast len", len(hookTast))
+
+	ctx.Data["WebhooksHookTast"] = hookTast
+
+	ctx.Data["WebhooksIdS"] = ids
+
 	ctx.Data["Webhooks"] = ws
 
 	ctx.HTML(http.StatusOK, tplHooks)
